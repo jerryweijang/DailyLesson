@@ -20,7 +20,7 @@ jobs:
       - name: Generate Wikisource link
         shell: bash
         run: |
-          IFS=$'\n' read -d '' -r -a lessons <<< "$LESSONS"
+          IFS=$'\n' read -r -a lessons <<< "$LESSONS"
           total=${#lessons[@]}
           day_idx=$(( $(date -u +%s) / 86400 % total ))
           title="${lessons[$day_idx]}"
