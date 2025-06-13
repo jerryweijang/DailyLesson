@@ -28,9 +28,9 @@ jobs:
           url_encoded=$(python3 encode.py "$title")
           link="https://zh.wikisource.org/zh-hant/${url_encoded}"
           out_dir="docs"
-          out_file="${out_dir}/$(date -u +%F).md"
+          out_file="${out_dir}/$(date -u +%F).html"
           mkdir -p "$out_dir"
-          printf -- "- [%s](%s)\n" "$title" "$link" > "$out_file"
+          printf '<!DOCTYPE html>\n<html lang="zh-Hant">\n<head>\n<meta charset="utf-8">\n<meta http-equiv="refresh" content="0;url=%s">\n<title>跳轉中...</title>\n</head>\n<body>\n如果沒有自動跳轉，請點擊 <a href="%s">%s</a>\n</body>\n</html>\n' "$link" "$link" "$title" > "$out_file"
           echo "🔗 生成：$out_file → $link"
       - name: Commit and push to Pages
         env:
