@@ -24,11 +24,8 @@ jobs:
           total=${#lessons[@]}
           day_idx=$(( $(date -u +%s) / 86400 % total ))
           title="${lessons[$day_idx]}"
-          url_encoded=$(python3 - <<PY
-import urllib.parse, os, sys
-print(urllib.parse.quote(os.environ['TITLE'] if 'TITLE' in os.environ else sys.argv[1]))
-PY
-"$title")
+          echo "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" > encode.py
+          url_encoded=$(python3 encode.py "$title")
           link="https://zh.wikisource.org/zh-hant/${url_encoded}"
           out_dir="docs"
           out_file="${out_dir}/$(date -u +%F).md"
