@@ -1,0 +1,63 @@
+name: Daily Lesson Link
+
+on:
+  # 每天台北 06:00（= UTC 22:00 前一日）
+  schedule:
+    - cron: '0 22 * * *'
+  # 隨時手動啟動以測試
+  workflow_dispatch:
+
+jobs:
+  generate-link:
+    runs-on: ubuntu-latest
+
+    # 直接在環境變數列出要輪播的課文標題（可自行增減）
+    env:
+      LESSONS: |
+        國文 第八課 記承天寺夜遊
+        國文 第九課 桃花源記
+        國文 第十課 木蘭詩
+
+    steps:
+      # 1) 取最新代碼
+      - uses: actions/checkout@v4
+
+      # 2) 產生「今日課文連結」並寫入 docs/YYYY-MM-DD.md
+      - name: Generate Wikisource link
+        shell: bash
+        run: |
+          # 將多行 LESSONS 讀成陣列
+          IFS=$'\n' read -d '' -r -a lessons <<< "$LESSONS"
+          total=${#lessons[@]}
+
+          # 依日期計算索引：每一天固定同一課
+          day_idx=$(( $(date -u +%s) / 86400 % total ))
+          title="${lessons[$day_idx]}"
+
+          # URL-encode → Wikisource 連結
+          url_encoded=$(python3 - <<PY
+import urllib.parse, os, sys
+print(urllib.parse.quote(os.environ['TITLE'] if 'TITLE' in os.environ else sys.argv[1]))
+PY
+"$title")
+
+          link="https://zh.wikisource.org/zh-hant/${url_encoded}"
+
+          # 建立 docs 目錄與當日檔案
+          out_dir="docs"
+          out_file="${out_dir}/$(date -u +%F).md"
+          mkdir -p "$out_dir"
+          printf -- "- [%s](%s)\n" "$title" "$link" > "$out_file"
+
+          echo "🔗 生成：$out_file → $link"
+
+      # 3) Commit & push 回 repo，使 GitHub Pages 生效
+      - name: Commit and push to Pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name  github-actions
+          git config user.email actions@github.com
+          git add docs
+          git commit -m "docs: add lesson link $(date -u +%F)" || echo "Nothing to commit"
+          git push
