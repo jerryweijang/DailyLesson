@@ -40,9 +40,7 @@ import urllib.parse, os, sys
 print(urllib.parse.quote(os.environ['TITLE'] if 'TITLE' in os.environ else sys.argv[1]))
 PY
 "$title")
-
           link="https://zh.wikisource.org/zh-hant/${url_encoded}"
-
           # 建立 docs 目錄與當日檔案
           out_dir="docs"
           out_file="${out_dir}/$(date -u +%F).md"
