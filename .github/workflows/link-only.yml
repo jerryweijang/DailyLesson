@@ -22,15 +22,19 @@ jobs:
         run: |
           IFS=$'\n' read -r -a lessons <<< "$LESSONS"
           total=${#lessons[@]}
+#<<<<<<< codex/find-and-fix-codebase-bug
+          day_idx=$(( $(TZ=Asia/Taipei date +%s) / 86400 % total ))
+=======
           # 以一年中的第幾天決定課文，讓每天都不同，每年循環
           day_of_year=$(date -u +%j)
           day_idx=$(( (10#$day_of_year - 1) % total ))
+#>>>>>>> main
           title="${lessons[$day_idx]}"
           echo "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" > encode.py
           url_encoded=$(python3 encode.py "$title")
           link="https://zh.wikisource.org/zh-hant/${url_encoded}"
           out_dir="docs"
-          out_file="${out_dir}/$(date -u +%F).html"
+          out_file="${out_dir}/$(TZ=Asia/Taipei date +%F).html"
           mkdir -p "$out_dir"
           printf '<!DOCTYPE html>\n<html lang="zh-Hant">\n<head>\n<meta charset="utf-8">\n<meta http-equiv="refresh" content="0;url=%s">\n<title>跳轉中...</title>\n</head>\n<body>\n如果沒有自動跳轉，請點擊 <a href="%s">%s</a>\n</body>\n</html>\n' "$link" "$link" "$title" > "$out_file"
           echo "🔗 生成：$out_file → $link"
@@ -41,5 +45,5 @@ jobs:
           git config user.name  github-actions
           git config user.email actions@github.com
           git add docs
-          git commit -m "docs: add lesson link $(date -u +%F)" || echo "Nothing to commit"
+          git commit -m "docs: add lesson link $(TZ=Asia/Taipei date +%F)" || echo "Nothing to commit"
           git push
