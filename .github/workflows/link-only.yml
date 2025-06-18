@@ -22,7 +22,13 @@ jobs:
         run: |
           IFS=$'\n' read -r -a lessons <<< "$LESSONS"
           total=${#lessons[@]}
+#<<<<<<< codex/find-and-fix-codebase-bug
           day_idx=$(( $(TZ=Asia/Taipei date +%s) / 86400 % total ))
+=======
+          # 以一年中的第幾天決定課文，讓每天都不同，每年循環
+          day_of_year=$(date -u +%j)
+          day_idx=$(( (10#$day_of_year - 1) % total ))
+#>>>>>>> main
           title="${lessons[$day_idx]}"
           echo "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" > encode.py
           url_encoded=$(python3 encode.py "$title")
