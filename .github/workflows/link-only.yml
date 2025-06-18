@@ -20,7 +20,7 @@ jobs:
       - name: Generate Wikisource link
         shell: bash
         run: |
-          IFS=$'\n' read -r -a lessons <<< "$LESSONS"
+          mapfile -t lessons <<< "$LESSONS"
           total=${#lessons[@]}
           # 以一年中的第幾天決定課文，讓每天都不同，每年循環
           day_of_year=$(TZ=Asia/Taipei date +%j)
