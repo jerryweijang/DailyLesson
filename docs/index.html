@@ -12,6 +12,9 @@
   function fmt(d) {
     return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
   }
+
+  var link = document.getElementById('link');
+
   function tryDate(d) {
     var url = fmt(d) + '.html';
     fetch(url, { method: 'HEAD' }).then(function(res) {
@@ -27,7 +30,7 @@
       tryDate(d);
     });
   }
-  var link = document.getElementById('link');
+
   tryDate(new Date());
 })();
 </script>
