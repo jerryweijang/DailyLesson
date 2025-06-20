@@ -8,12 +8,30 @@
 如果沒有自動跳轉，請點擊 <a id="link" href="">這裡</a>
 <script>
 (function() {
-  function pad(n){ return n.toString().padStart(2,'0'); }
-  var now = new Date();
-  var date = now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate());
-  var url = date + '.html';
-  document.getElementById('link').href = url;
-  window.location.replace(url);
+  function pad(n) { return n.toString().padStart(2, '0'); }
+  function fmt(d) {
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+
+  var link = document.getElementById('link');
+
+  function tryDate(d) {
+    var url = fmt(d) + '.html';
+    fetch(url, { method: 'HEAD' }).then(function(res) {
+      if (res.ok) {
+        link.href = url;
+        window.location.replace(url);
+      } else {
+        d.setDate(d.getDate() - 1);
+        tryDate(d);
+      }
+    }).catch(function() {
+      d.setDate(d.getDate() - 1);
+      tryDate(d);
+    });
+  }
+
+  tryDate(new Date());
 })();
 </script>
 </body>
