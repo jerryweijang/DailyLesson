@@ -16,7 +16,9 @@ jobs:
         id: fetch
         run: |
           url="https://www.learnmode.net/course/638520/content"
-<<<<<<< g2bt42-codex/update-lesson-fetching-logic
+
+          # Use a User-Agent header so requests are less likely to be blocked
+
           set -o pipefail
           tmp=$(mktemp)
           if ! curl -fsSL -A 'Mozilla/5.0' "$url" 2>"$tmp" | \
@@ -30,9 +32,9 @@ jobs:
               '國文 第十課 木蘭詩' > lessons.txt
           fi
           rm -f "$tmp"
-=======
+
           curl -fsSL "$url" | grep -oE '【[0-9]+-[0-9]+】[^<]+' > lessons.txt
->>>>>>> main
+
           echo 'LESSONS<<EOF' >> "$GITHUB_ENV"
           cat lessons.txt >> "$GITHUB_ENV"
           echo 'EOF' >> "$GITHUB_ENV"
