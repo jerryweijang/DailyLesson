@@ -24,6 +24,7 @@ jobs:
           curl_status=$?
           grep -oE '【[0-9]+-[0-9]+】[^<]+' "$tmp" > lessons.txt
           grep_status=$?
+          cat "$tmp"
           if [ $curl_status -ne 0 ] || [ $grep_status -ne 0 ] || [ ! -s lessons.txt ]; then
             echo "scraping failed: curl=$curl_status grep=$grep_status"
             set -o pipefail
