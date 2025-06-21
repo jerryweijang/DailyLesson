@@ -18,11 +18,17 @@ jobs:
           set -x
           pip install selenium beautifulsoup4
           python fetch_lesson_titles.py > lessons.txt
+          echo '--- lessons.txt 內容如下 ---'
+          cat lessons.txt
+          echo '--- lessons.txt 結束 ---'
           {
             echo 'LESSONS<<EOF'
             cat lessons.txt
             echo 'EOF'
           } >> "$GITHUB_ENV"
+          echo '--- GITHUB_ENV 設定完畢 ---'
+          cat lessons.txt
+          echo '--- lessons.txt 再次列出 ---'
 
       - name: Generate Perplexity lesson
         shell: bash
