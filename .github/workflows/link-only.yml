@@ -16,6 +16,7 @@ jobs:
         id: fetch
         run: |
           url="https://www.learnmode.net/course/638520/content"
+          # Use a User-Agent header so requests are less likely to be blocked
           set -o pipefail
           tmp=$(mktemp)
           if ! curl -fsSL -A 'Mozilla/5.0' "$url" 2>"$tmp" | \
