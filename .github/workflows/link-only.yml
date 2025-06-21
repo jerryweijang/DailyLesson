@@ -15,6 +15,7 @@ jobs:
       - name: Fetch lesson titles
         id: fetch
         run: |
+          set -x
           url="https://www.learnmode.net/course/638520/content"
 
           # Use a User-Agent header so requests are less likely to be blocked
