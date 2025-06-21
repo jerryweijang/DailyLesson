@@ -10,13 +10,16 @@ on:
 jobs:
   generate-link:
     runs-on: ubuntu-latest
-    env:
-      LESSONS: |
-        國文 第八課 記承天寺夜遊
-        國文 第九課 桃花源記
-        國文 第十課 木蘭詩
     steps:
       - uses: actions/checkout@v4
+      - name: Fetch lesson titles
+        id: fetch
+        run: |
+          url="https://www.learnmode.net/course/638520/content"
+          curl -fsSL "$url" | grep -oE '【[0-9]+-[0-9]+】[^<]+' > lessons.txt
+          echo 'LESSONS<<EOF' >> "$GITHUB_ENV"
+          cat lessons.txt >> "$GITHUB_ENV"
+          echo 'EOF' >> "$GITHUB_ENV"
       - name: Generate Perplexity lesson
         shell: bash
         run: |
