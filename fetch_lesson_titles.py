@@ -1,5 +1,4 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 import time
@@ -10,12 +9,8 @@ options.add_argument('--headless')
 options.add_argument('--no-sandbox')
 options.add_argument('--disable-dev-shm-usage')
 
-# chromedriver 路徑請依實際環境修改
-CHROMEDRIVER_PATH = 'chromedriver'  # 若已在 PATH 可直接寫 'chromedriver'
-
-# 建立 webdriver
-service = Service(CHROMEDRIVER_PATH)
-driver = webdriver.Chrome(service=service, options=options)
+# 直接由 selenium-manager 取得 ChromeDriver
+driver = webdriver.Chrome(options=options)
 
 try:
     url = 'https://www.learnmode.net/course/638520/content'
