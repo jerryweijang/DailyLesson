@@ -18,6 +18,16 @@ jobs:
           url="https://www.learnmode.net/course/638520/content"
 
           # Use a User-Agent header so requests are less likely to be blocked
+          tmp=$(mktemp)
+          curl -fsSL -A 'Mozilla/5.0' "$url" -o "$tmp"
+          curl_status=$?
+          grep -oE '【[0-9]+-[0-9]+】[^<]+' "$tmp" > lessons.txt
+          grep_status=$?
+          if [ $curl_status -ne 0 ] || [ $grep_status -ne 0 ] || [ ! -s lessons.txt ]; then
+            echo "scraping failed: curl=$curl_status grep=$grep_status"
+
+
+          # Use a User-Agent header so requests are less likely to be blocked
 
           set -o pipefail
           tmp=$(mktemp)
@@ -25,6 +35,7 @@ jobs:
             grep -oE '【[0-9]+-[0-9]+】[^<]+' > lessons.txt
           then
             echo "scraping failed: curl=${PIPESTATUS[0]} grep=${PIPESTATUS[1]}"
+
             cat "$tmp"
             printf '%s\n' \
               '國文 第八課 記承天寺夜遊' \
@@ -33,11 +44,19 @@ jobs:
           fi
           rm -f "$tmp"
 
+          {
+            echo 'LESSONS<<EOF'
+            cat lessons.txt
+            echo 'EOF'
+          } >> "$GITHUB_ENV"
+
+
           curl -fsSL "$url" | grep -oE '【[0-9]+-[0-9]+】[^<]+' > lessons.txt
 
           echo 'LESSONS<<EOF' >> "$GITHUB_ENV"
           cat lessons.txt >> "$GITHUB_ENV"
           echo 'EOF' >> "$GITHUB_ENV"
+
       - name: Generate Perplexity lesson
         shell: bash
         run: |
