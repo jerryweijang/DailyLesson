@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 import time
+import re
 
 # 設定 Chrome options
 options = Options()
@@ -18,10 +19,13 @@ try:
     time.sleep(5)  # 等待 JS 載入
 
     soup = BeautifulSoup(driver.page_source, 'html.parser')
-    # 依實際網頁結構調整 selector
+    # 抓出所有章節名稱 <h3 class="chapter-name">
     titles = soup.select('h3.chapter-name')
 
+    # 只保留符合【數字-數字】格式的章節名稱
     for title in titles:
-        print(title.get_text(strip=True))
+        text = title.get_text(strip=True)
+        if re.match(r'【\d+-\d+】', text):
+            print(text)
 finally:
     driver.quit()
