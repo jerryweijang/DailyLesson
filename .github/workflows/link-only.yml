@@ -18,7 +18,7 @@ jobs:
           url="https://www.learnmode.net/course/638520/content"
           set -o pipefail
           tmp=$(mktemp)
-          if ! curl -fsSL "$url" 2>"$tmp" | \
+          if ! curl -fsSL -A 'Mozilla/5.0' "$url" 2>"$tmp" | \
             grep -oE '【[0-9]+-[0-9]+】[^<]+' > lessons.txt
           then
             echo "scraping failed: curl=${PIPESTATUS[0]} grep=${PIPESTATUS[1]}"
