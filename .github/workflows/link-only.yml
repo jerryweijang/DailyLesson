@@ -12,46 +12,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch lesson titles
-        id: fetch
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
         run: |
-          set -x
-          pip install selenium beautifulsoup4
-          python fetch_lesson_titles.py > lessons.txt
-          echo '--- lessons.txt 內容如下 ---'
-          cat lessons.txt
-          echo '--- lessons.txt 結束 ---'
-          {
-            echo 'LESSONS<<EOF'
-            cat lessons.txt
-            echo 'EOF'
-          } >> "$GITHUB_ENV"
-          echo '--- GITHUB_ENV 設定完畢 ---'
-          cat lessons.txt
-          echo '--- lessons.txt 再次列出 ---'
-
-      - name: Generate Perplexity lesson
-        shell: bash
+          pip install -r requirements.txt
+      
+      - name: Install Chrome
         run: |
-          mapfile -t lessons <<< "$LESSONS"
-          total=${#lessons[@]}
-          # 以一年中的第幾天決定課文，讓每天都不同，每年循環
-          day_of_year=$(TZ=Asia/Taipei date +%j)
-          day_idx=$(( (10#$day_of_year - 1) % total ))
-          title="${lessons[$day_idx]}"
-          echo "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" > encode.py
-          prompt="請根據附檔的課文教學重點格式，提供一篇詳細的課文學習教材，內容盡可能的詳細，題目如下: ${title}"
-          url_encoded=$(python3 encode.py "$prompt")
-          link="https://www.perplexity.ai/search?q=${url_encoded}"
-          out_dir="docs"
-          out_file="${out_dir}/$(TZ=Asia/Taipei date +%F).html"
-          mkdir -p "$out_dir"
-          if response=$(curl -fsSL "$link"); then
-            echo "$response" > "$out_file"
-          else
-            printf '<!DOCTYPE html>\n<html lang="zh-Hant">\n<head>\n<meta charset="utf-8">\n<meta http-equiv="refresh" content="0;url=%s">\n<title>跳轉中...</title>\n</head>\n<body>\n如果沒有自動跳轉，請點擊 <a href="%s">%s</a>\n</body>\n</html>\n' "$link" "$link" "$title" > "$out_file"
-          fi
-          echo "🔗 生成：$out_file → $link"
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+      
+      - name: Generate lessons with images
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python main_with_images.py
+      
       - name: Commit and push to Pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
