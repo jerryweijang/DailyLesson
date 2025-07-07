@@ -122,17 +122,21 @@ class DailyLessonOrchestrator:
         return lesson_data
     
     def _save_lesson_content(self, lesson_data: Dict, date_str: str) -> None:
-        """Save lesson content in both HTML and JSON formats"""
-        # Ensure docs directory exists
+        """Save lesson content in both HTML and JSON formats, 並將 source_url 指向本地圖片"""
         os.makedirs('docs', exist_ok=True)
-        
+        # 若有 image_url，則將 source_url 指向本地 images 目錄
+        image_url = lesson_data.get('image_url')
+        if image_url and not image_url.startswith('https://example.com/mock-images/'):
+            ext = os.path.splitext(image_url)[-1].split('?')[0] or '.jpg'
+            file_name = f"{lesson_data.get('id', 'lesson')}{ext}"
+            local_image_path = f"images/{date_str}/{file_name}"
+            lesson_data['source_url'] = local_image_path
         # Save HTML with image display
         html_content = self.html_renderer.render(lesson_data, date_str)
         html_file = f"docs/{date_str}.html"
         with open(html_file, 'w', encoding='utf-8') as f:
             f.write(html_content)
         self.logger.info(f"已生成 HTML 檔案: {html_file}")
-        
         # Save JSON data
         json_content = self.json_renderer.render(lesson_data, date_str)
         json_file = f"docs/{date_str}.json"
