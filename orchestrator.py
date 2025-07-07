@@ -153,6 +153,10 @@ def create_production_orchestrator() -> DailyLessonOrchestrator:
     # Use real image generator if GitHub token is available, otherwise use mock
     github_token = os.environ.get("GITHUB_TOKEN")
     if github_token:
+        if os.environ.get("GITHUB_ACTIONS") and not github_token.startswith("github_pat_"):
+            logging.warning(
+                "在 GitHub Actions 環境偵測到預設 GITHUB_TOKEN，可能無法存取 GitHub Models"
+            )
         image_generator = GitHubModelsImageGenerator(github_token)
         logging.info("使用真實的圖像生成器 (GitHub Models API)")
     else:

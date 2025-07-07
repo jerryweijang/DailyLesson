@@ -64,7 +64,21 @@ class GitHubModelsImageGenerator(ImageGenerator):
             return image_url
             
         except Exception as e:
-            self.logger.error(f"圖像產生失敗: {subject} - {title}, 錯誤: {str(e)}")
+            if os.environ.get("GITHUB_ACTIONS"):
+                token = os.environ.get("GITHUB_TOKEN", "")
+                if not token or not token.startswith("github_pat_"):
+                    self.logger.error(
+                        "GitHub Actions 環境中圖像生成失敗，可能未提供具備 GitHub Models 權限的 GITHUB_TOKEN: %s",
+                        str(e),
+                    )
+                else:
+                    self.logger.error(
+                        f"圖像產生失敗: {subject} - {title}, 錯誤: {str(e)}"
+                    )
+            else:
+                self.logger.error(
+                    f"圖像產生失敗: {subject} - {title}, 錯誤: {str(e)}"
+                )
             return None
 
 
