@@ -36,7 +36,7 @@ class PromptGenerator:
 
 
 class GitHubModelsImageGenerator(ImageGenerator):
-    """Concrete implementation of ImageGenerator using GitHub Models API"""
+    """Concrete implementation of ImageGenerator using GitHub Models API with fallback"""
     
     def __init__(self, api_key: Optional[str] = None):
         self.client = OpenAI(
@@ -45,9 +45,10 @@ class GitHubModelsImageGenerator(ImageGenerator):
         )
         self.logger = logging.getLogger(__name__)
         self.prompt_generator = PromptGenerator()
+        self.fallback_generator = MockImageGenerator()
         
     def generate_image(self, subject: str, title: str, content: str) -> Optional[str]:
-        """Generate image for lesson content"""
+        """Generate image for lesson content with fallback to mock images"""
         try:
             prompt = self.prompt_generator.create_educational_prompt(subject, title, content)
             
@@ -64,8 +65,17 @@ class GitHubModelsImageGenerator(ImageGenerator):
             return image_url
             
         except Exception as e:
-            self.logger.error(f"圖像產生失敗: {subject} - {title}, 錯誤: {str(e)}")
-            return None
+            self.logger.warning(f"GitHub Models API 失敗: {subject} - {title}, 錯誤: {str(e)}")
+            self.logger.info(f"使用備用圖像生成器: {subject} - {title}")
+            
+            # Fallback to mock image generator
+            fallback_url = self.fallback_generator.generate_image(subject, title, content)
+            if fallback_url:
+                self.logger.info(f"成功產生備用圖像: {subject} - {title}")
+                return fallback_url
+            else:
+                self.logger.error(f"備用圖像生成也失敗: {subject} - {title}")
+                return None
 
 
 class MockImageGenerator(ImageGenerator):
@@ -73,11 +83,28 @@ class MockImageGenerator(ImageGenerator):
     
     def __init__(self):
         self.logger = logging.getLogger(__name__)
+        # Use educational placeholder images from public sources
+        self.subject_image_templates = {
+            "自然": "https://via.placeholder.com/1024x1024/4CAF50/FFFFFF?text=自然科學",
+            "國文": "https://via.placeholder.com/1024x1024/FF9800/FFFFFF?text=國文",
+            "歷史": "https://via.placeholder.com/1024x1024/795548/FFFFFF?text=歷史",
+            "地理": "https://via.placeholder.com/1024x1024/2196F3/FFFFFF?text=地理",
+            "公民": "https://via.placeholder.com/1024x1024/9C27B0/FFFFFF?text=公民"
+        }
         
     def generate_image(self, subject: str, title: str, content: str) -> Optional[str]:
         """Generate mock image URL for testing"""
         self.logger.info(f"生成模擬圖像: {subject} - {title}")
-        return f"https://example.com/mock-images/{subject}_{hash(title) % 10000}.jpg"
+        
+        # Use subject-specific color and template
+        if subject in self.subject_image_templates:
+            base_url = self.subject_image_templates[subject]
+            # Add lesson title to the image URL for variety
+            lesson_id = hash(title) % 10000
+            return f"{base_url}&lesson={lesson_id}"
+        else:
+            # Generic educational placeholder
+            return f"https://via.placeholder.com/1024x1024/607D8B/FFFFFF?text=教育內容&lesson={hash(title) % 10000}"
 
 
 class EducationalImageService:
