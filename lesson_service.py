@@ -19,26 +19,36 @@ class SubjectFilter:
     @staticmethod
     def filter_nature(text: str) -> bool:
         """自然: 【數字-數字】"""
+        if text is None:
+            return False
         return bool(re.match(r'【\d+-\d+】', text))
 
     @staticmethod
     def filter_chinese(text: str) -> bool:
         """國文: 只抓含【】符號的項目，如【第一課】 聲音鐘"""
+        if text is None:
+            return False
         return bool(re.search(r'【[^】]+】', text))
 
     @staticmethod
     def filter_history(text: str) -> bool:
         """歷史: 只抓「主題X」或「單元X」開頭"""
+        if text is None:
+            return False
         return bool(re.match(r'【\d+-\d+】', text))
 
     @staticmethod
     def filter_geography(text: str) -> bool:
         """地理: 只抓「主題X」或「單元X」開頭"""
+        if text is None:
+            return False
         return bool(re.match(r'【\d+-\d+】', text))
 
     @staticmethod
     def filter_civics(text: str) -> bool:
         """公民: 只抓「主題X」或「單元X」開頭"""
+        if text is None:
+            return False
         return bool(re.match(r'【\d+-\d+】', text))
 
 
@@ -105,7 +115,7 @@ class DayBasedLessonSelector(LessonSelector):
     def select_daily_lesson(self, lessons: List[Dict]) -> Dict:
         """Select the lesson for today from the available lessons"""
         if not lessons:
-            raise ValueError("No lessons available for selection")
+            return {}
         
         day_of_year = datetime.now().timetuple().tm_yday
         daily_lesson_idx = (day_of_year - 1) % len(lessons)

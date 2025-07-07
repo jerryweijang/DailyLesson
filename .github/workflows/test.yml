@@ -1,0 +1,151 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.9, 3.10, 3.11, 3.12]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y chromium-browser chromium-chromedriver
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run linting (if available)
+      continue-on-error: true
+      run: |
+        pip install flake8 black isort || true
+        # Run linting but don't fail the build
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics || true
+        black --check . || true
+        isort --check-only . || true
+    
+    - name: Run unit tests
+      run: |
+        python run_tests.py --unit --verbose
+    
+    - name: Run integration tests (exclude slow tests)
+      run: |
+        python -m pytest tests/test_integration.py -v -m "not slow"
+    
+    - name: Run all tests with coverage
+      if: matrix.python-version == '3.12'
+      run: |
+        pip install pytest-cov
+        python -m pytest --cov=. --cov-report=xml --cov-report=term -m "not slow"
+    
+    - name: Upload coverage to Codecov
+      if: matrix.python-version == '3.12'
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false
+    
+    - name: Test demo script
+      run: |
+        python -c "from orchestrator import create_demo_orchestrator; print('✅ Demo orchestrator created successfully')"
+    
+    - name: Test module imports
+      run: |
+        python -c "import interfaces, lesson_service, image_service, content_renderer, orchestrator; print('✅ All modules imported successfully')"
+    
+    - name: Validate test files exist
+      run: |
+        test -f tests/test_interfaces.py || exit 1
+        test -f tests/test_lesson_service.py || exit 1
+        test -f tests/test_image_service.py || exit 1
+        test -f tests/test_content_renderer.py || exit 1
+        test -f tests/test_orchestrator.py || exit 1
+        test -f tests/test_integration.py || exit 1
+        echo "✅ All test files exist"
+
+  slow-tests:
+    runs-on: ubuntu-latest
+    # Only run slow tests on scheduled runs or manual triggers
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y chromium-browser chromium-chromedriver
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run slow tests
+      run: |
+        python -m pytest -v -m "slow" --timeout=300
+    
+    - name: Run full integration tests
+      run: |
+        python -m pytest tests/test_integration.py -v
+
+  compatibility:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Test backwards compatibility
+      run: |
+        # Test that existing files still work
+        python -c "from content_renderer import LegacyHtmlRenderer; print('✅ Legacy renderer works')"
+        python -c "from fetch_lesson_titles import filter_nature; print('✅ Original script compatibility')"
+    
+    - name: Test output format compatibility
+      run: |
+        python -c "
+        from orchestrator import create_demo_orchestrator;
+        import tempfile, os, json;
+        orchestrator = create_demo_orchestrator();
+        with tempfile.TemporaryDirectory() as temp_dir:
+            os.chdir(temp_dir);
+            # Test that we can create output files
+            lesson_data = {'subject': '自然', 'title': '測試課程'};
+            html = orchestrator.html_renderer.render(lesson_data, '2024-01-01');
+            json_str = orchestrator.json_renderer.render(lesson_data, '2024-01-01');
+            assert 'perplexity.ai' in html;
+            json_data = json.loads(json_str);
+            assert 'date' in json_data;
+            print('✅ Output format compatibility verified');
+        "
