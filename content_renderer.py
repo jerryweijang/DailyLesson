@@ -121,7 +121,14 @@ class EnhancedHtmlRenderer(ContentRenderer):
     def _generate_image_html(self, image_url: str) -> str:
         """Generate HTML for displaying the lesson image"""
         if image_url:
-            return f'<img src="{image_url}" alt="課程圖像" class="lesson-image" onerror="this.style.display=\'none\'">'
+            # 檢查是否為模擬URL
+            if image_url.startswith('https://example.com/mock-images/'):
+                return f'''<div class="image-placeholder">
+                    <p>🎨 圖像生成功能正在開發中</p>
+                    <p>模擬圖像 URL: <code>{image_url}</code></p>
+                </div>'''
+            else:
+                return f'<img src="{image_url}" alt="課程圖像" class="lesson-image" onerror="this.parentElement.innerHTML=\'<div class=&quot;image-placeholder&quot;>圖像載入失敗</div>\'">'
         else:
             return '<div class="image-placeholder">課程圖像生成中...</div>'
 

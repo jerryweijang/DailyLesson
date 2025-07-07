@@ -102,6 +102,8 @@ class DailyLessonOrchestrator:
     
     def _enhance_lesson_with_image(self, lesson_data: Dict) -> Dict:
         """Add image to lesson data"""
+        self.logger.info(f"開始為課程生成圖像: {lesson_data['subject']} - {lesson_data['title']}")
+        
         image_url = self.image_service.generate_lesson_image(
             lesson_data['subject'],
             lesson_data['title'],
@@ -111,6 +113,11 @@ class DailyLessonOrchestrator:
         if image_url:
             lesson_data['image_url'] = image_url
             lesson_data['image_generated_at'] = datetime.now().isoformat()
+            self.logger.info(f"圖像生成成功: {image_url}")
+        else:
+            self.logger.warning(f"圖像生成失敗: {lesson_data['subject']} - {lesson_data['title']}")
+            lesson_data['image_url'] = None
+            lesson_data['image_error'] = "圖像生成失敗"
         
         return lesson_data
     
@@ -143,9 +150,11 @@ def create_production_orchestrator() -> DailyLessonOrchestrator:
     github_token = os.environ.get("GITHUB_TOKEN")
     if github_token:
         image_generator = GitHubModelsImageGenerator(github_token)
+        logging.info("使用真實的圖像生成器 (GitHub Models API)")
     else:
         image_generator = MockImageGenerator()
-        logging.warning("No GITHUB_TOKEN found, using mock image generator")
+        logging.warning("未找到 GITHUB_TOKEN，使用模擬圖像生成器")
+        logging.info("若要使用真實圖像生成，請設定 GITHUB_TOKEN 環境變數")
     
     html_renderer = EnhancedHtmlRenderer()
     json_renderer = JsonRenderer()
