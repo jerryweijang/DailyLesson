@@ -46,19 +46,16 @@
             border-radius: 5px;
             margin-top: 20px;
         }
-        .countdown {
-            font-size: 1.5em;
-            color: #27ae60;
-            font-weight: bold;
-        }
         .manual-link {
             display: inline-block;
             margin-top: 15px;
-            padding: 10px 20px;
+            padding: 15px 30px;
             background-color: #3498db;
             color: white;
             text-decoration: none;
             border-radius: 5px;
+            font-size: 1.2em;
+            font-weight: bold;
             transition: background-color 0.3s;
         }
         .manual-link:hover {
@@ -86,30 +83,9 @@
         <div class="image-placeholder">課程圖像生成中...</div>
         
         <div class="redirect-info">
-            <p>將在 <span class="countdown" id="countdown">5</span> 秒後自動跳轉到學習內容...</p>
-            <p>或點擊下方按鈕直接前往：</p>
+            <p>點擊下方按鈕開始學習：</p>
             <a href="https://www.perplexity.ai/search?q=%E8%AB%8B%E6%A0%B9%E6%93%9A%E9%99%84%E6%AA%94%E7%9A%84%E8%AA%B2%E6%96%87%E6%95%99%E5%AD%B8%E9%87%8D%E9%BB%9E%E6%A0%BC%E5%BC%8F%EF%BC%8C%E6%8F%90%E4%BE%9B%E4%B8%80%E7%AF%87%E8%A9%B3%E7%B4%B0%E7%9A%84%E8%AA%B2%E6%96%87%E5%AD%B8%E7%BF%92%E6%95%99%E6%9D%90%EF%BC%8C%E5%85%A7%E5%AE%B9%E7%9B%A1%E5%8F%AF%E8%83%BD%E7%9A%84%E8%A9%B3%E7%B4%B0%EF%BC%8C%E9%A1%8C%E7%9B%AE%E5%A6%82%E4%B8%8B%3A%20%E3%80%904-4%E3%80%91%20%E7%94%9F%E6%85%8B%E7%B3%BB%E7%9A%84%E9%A1%9E%E5%9E%8B" class="manual-link">開始學習</a>
         </div>
     </div>
-
-    <script>
-        let seconds = 5;
-        const countdownElement = document.getElementById('countdown');
-        
-        function updateCountdown() {
-            countdownElement.textContent = seconds;
-            seconds--;
-            
-            if (seconds < 0) {
-                window.location.href = 'https://www.perplexity.ai/search?q=%E8%AB%8B%E6%A0%B9%E6%93%9A%E9%99%84%E6%AA%94%E7%9A%84%E8%AA%B2%E6%96%87%E6%95%99%E5%AD%B8%E9%87%8D%E9%BB%9E%E6%A0%BC%E5%BC%8F%EF%BC%8C%E6%8F%90%E4%BE%9B%E4%B8%80%E7%AF%87%E8%A9%B3%E7%B4%B0%E7%9A%84%E8%AA%B2%E6%96%87%E5%AD%B8%E7%BF%92%E6%95%99%E6%9D%90%EF%BC%8C%E5%85%A7%E5%AE%B9%E7%9B%A1%E5%8F%AF%E8%83%BD%E7%9A%84%E8%A9%B3%E7%B4%B0%EF%BC%8C%E9%A1%8C%E7%9B%AE%E5%A6%82%E4%B8%8B%3A%20%E3%80%904-4%E3%80%91%20%E7%94%9F%E6%85%8B%E7%B3%BB%E7%9A%84%E9%A1%9E%E5%9E%8B';
-            }
-        }
-        
-        // Update countdown every second
-        setInterval(updateCountdown, 1000);
-        
-        // Initial update
-        updateCountdown();
-    </script>
 </body>
 </html>
