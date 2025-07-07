@@ -72,19 +72,16 @@ class EnhancedHtmlRenderer(ContentRenderer):
             border-radius: 5px;
             margin-top: 20px;
         }}
-        .countdown {{
-            font-size: 1.5em;
-            color: #27ae60;
-            font-weight: bold;
-        }}
         .manual-link {{
             display: inline-block;
             margin-top: 15px;
-            padding: 10px 20px;
+            padding: 15px 30px;
             background-color: #3498db;
             color: white;
             text-decoration: none;
             border-radius: 5px;
+            font-size: 1.2em;
+            font-weight: bold;
             transition: background-color 0.3s;
         }}
         .manual-link:hover {{
@@ -112,31 +109,10 @@ class EnhancedHtmlRenderer(ContentRenderer):
         {self._generate_image_html(image_url)}
         
         <div class="redirect-info">
-            <p>將在 <span class="countdown" id="countdown">5</span> 秒後自動跳轉到學習內容...</p>
-            <p>或點擊下方按鈕直接前往：</p>
+            <p>點擊下方按鈕開始學習：</p>
             <a href="{perplexity_link}" class="manual-link">開始學習</a>
         </div>
     </div>
-
-    <script>
-        let seconds = 5;
-        const countdownElement = document.getElementById('countdown');
-        
-        function updateCountdown() {{
-            countdownElement.textContent = seconds;
-            seconds--;
-            
-            if (seconds < 0) {{
-                window.location.href = '{perplexity_link}';
-            }}
-        }}
-        
-        // Update countdown every second
-        setInterval(updateCountdown, 1000);
-        
-        // Initial update
-        updateCountdown();
-    </script>
 </body>
 </html>'''
         
